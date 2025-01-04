@@ -7,12 +7,15 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [message, setMessage] = useState(""); // To store the success/error message
+  const [messageType, setMessageType] = useState(""); // To store the type of message (success or error)
   const navigate = useNavigate();
 
   const handleChanges = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
   };
-  const handleSumbit = async (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(
@@ -21,17 +24,21 @@ const Login = () => {
       );
       if (response.status === 201) {
         localStorage.setItem("token", response.data.token);
-        navigate("/");
+        setMessage("Successfully Logged In!");
+        setMessageType("success");
+        setTimeout(() => navigate("/"), 2000); // Redirect after 2 seconds
       }
     } catch (err) {
-      console.log(err.message);
+      setMessage(err.response?.data?.message || "An error occurred");
+      setMessageType("error");
     }
   };
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="shadow-lg px-8 py-5 border w-72">
         <h2 className="text-lg font-bold mb-4 text-center">Login</h2>
-        <form onSubmit={handleSumbit}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">
               Email
@@ -61,11 +68,24 @@ const Login = () => {
           </button>
         </form>
         <div className="text-center">
-          <span>Don't have account?</span>
+          <span>Don't have an account?</span>
           <Link to="/register" className="text-blue-500">
             Signup
           </Link>
         </div>
+
+        {/* Toast Notification */}
+        {message && (
+          <div
+            className={`mt-4 text-center p-3 rounded ${
+              messageType === "success"
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {message}
+          </div>
+        )}
       </div>
     </div>
   );
